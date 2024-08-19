@@ -33,8 +33,11 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/light/
+    - assets/images/dark/
+    - assets/images/icons/
     - assets/images/balloons/
-    - assets/images/backgrounds/
+    #- assets/images/backgrounds/
     - assets/sounds/
     # Optionally, you can specify fonts
     #fonts:

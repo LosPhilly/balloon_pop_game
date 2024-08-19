@@ -5,8 +5,7 @@ class BalloonWidget extends StatelessWidget {
   final Balloon balloon;
   final VoidCallback onPop;
 
-  const BalloonWidget({Key? key, required this.balloon, required this.onPop})
-      : super(key: key);
+  BalloonWidget({required this.balloon, required this.onPop});
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +14,21 @@ class BalloonWidget extends StatelessWidget {
       top: balloon.position.dy,
       child: GestureDetector(
         onTap: onPop,
-        child: Image.asset(
-          balloon.imagePath,
-          width: balloon.size,
-          height: balloon.size,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset(
+              balloon.imagePath,
+              width: balloon.size,
+              height: balloon.size,
+            ),
+            if (balloon.iconPath != null)
+              Image.asset(
+                balloon.iconPath!,
+                width: balloon.size / 2,
+                height: balloon.size / 2,
+              ),
+          ],
         ),
       ),
     );

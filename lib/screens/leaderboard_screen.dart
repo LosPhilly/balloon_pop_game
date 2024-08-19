@@ -24,10 +24,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   Future<void> loadLeaderboard() async {
     List<Map<String, dynamic>> entries =
         await leaderboardService.getLeaderboard();
+    int totalPlayersCount = await leaderboardService.getTotalPlayers();
 
     setState(() {
       leaderboardEntries = entries;
-      totalPlayers = entries.length;
+      totalPlayers = totalPlayersCount; // Update with total players count
       if (entries.isNotEmpty) {
         highestScore = entries
             .map((entry) => entry['score'] as int)

@@ -4,6 +4,8 @@ import '../widgets/balloon_widget.dart';
 import '../services/achievements_service.dart';
 import '../services/leaderboard_service.dart';
 import '../services/game_logic_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class GameScreen extends StatefulWidget {
   @override
@@ -41,10 +43,24 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    bool isNightMode = themeProvider.isNightMode;
+
+    // Choose a background image based on the theme
+    final backgroundImage = isNightMode
+        ? 'assets/images/dark/sky_dark_1.png' // Dark theme background
+        : 'assets/images/light/sky_1.png'; // Light theme background
+
     return Scaffold(
-      backgroundColor: Colors.blueAccent, // Set a playful background color
       body: Stack(
         children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              backgroundImage,
+              fit: BoxFit.cover,
+            ),
+          ),
           // Display balloons
           ...gameLogicService.balloons.map((balloon) {
             return BalloonWidget(

@@ -11,7 +11,7 @@ class GameLogicService {
   int level = 1;
   int balloonsPopped = 0; // Track the number of balloons popped per level
   int balloonsRequired = 5; // Balloons required to level up
-  double timeLeft = 5.0; // Start with 10 seconds for more urgency
+  double timeLeft = 10.0; // Start with 10 seconds for more urgency
   List<Balloon> balloons = [];
   Timer? gameTimer;
   Timer? balloonGeneratorTimer;
@@ -23,7 +23,13 @@ class GameLogicService {
   final List<String> balloonImages = [
     'assets/images/balloons/balloon_red.png',
     'assets/images/balloons/balloon_blue.png',
+    'assets/images/balloons/balloon_green.png',
     // Add more balloon image paths here
+  ];
+
+  final List<String> timeIcons = [
+    'assets/images/icons/add_time.png', // Icon to add time
+    'assets/images/icons/subtract_time.png', // Icon to subtract time
   ];
 
   void removeAds() {
@@ -32,8 +38,7 @@ class GameLogicService {
 
   void loadInterstitialAd() {
     InterstitialAd.load(
-      adUnitId:
-          'ca-app-pub-1135480968301432~9313890103', // Test Ad Unit ID: 'ca-app-pub-3940256099942544~1033173712'  > Real ID : ca-app-pub-1135480968301432~9313890103
+      adUnitId: 'ca-app-pub-1135480968301432~9313890103', // Test Ad Unit ID
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
@@ -53,13 +58,11 @@ class GameLogicService {
     if (_interstitialAd != null && !isAdRemoved) {
       _interstitialAd?.show();
       _interstitialAd = null;
-      loadInterstitialAd();
     }
   }
 
   void startGame(Function updateState, BuildContext context) {
     this.context = context; // Store the context for navigation later
-    loadInterstitialAd(); // Load ad when starting the game
     // Generate balloons at intervals
     balloonGeneratorTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       generateBalloon(updateState);
@@ -81,12 +84,26 @@ class GameLogicService {
     // Select a random balloon image from the list
     final balloonImage = balloonImages[random.nextInt(balloonImages.length)];
 
+    // Determine if the balloon will add or subtract time
+    final isTimeBalloon = random.nextBool();
+    final timeChange = isTimeBalloon
+        ? (random.nextBool() ? 2.0 : -2.0)
+        : 0.0; // Add or subtract 2 seconds
+
+    // Select the appropriate icon
+    String? timeIcon;
+    if (timeChange != 0.0) {
+      timeIcon = timeChange > 0 ? timeIcons[0] : timeIcons[1];
+    }
+
     final balloon = Balloon(
       imagePath: balloonImage,
       size: size,
       position: Offset(
           xPosition, 600 - size), // Replace with MediaQuery for dynamic height
       points: size.toInt(),
+      timeChange: timeChange, // New field to handle time addition/subtraction
+      iconPath: timeIcon, // Icon to show on the balloon
     );
 
     balloons.add(balloon);
@@ -142,6 +159,8 @@ class GameLogicService {
         size: balloon.size,
         position: Offset(balloon.position.dx, newY),
         points: balloon.points,
+        timeChange: balloon.timeChange,
+        iconPath: balloon.iconPath,
       );
     }).toList();
 
@@ -152,7 +171,8 @@ class GameLogicService {
   void popBalloon(Balloon balloon, Function updateState) {
     score += balloon.points;
     balloonsPopped++;
-    timeLeft += 1; // Add 1 second for each balloon popped for more urgency
+    timeLeft += balloon
+        .timeChange; // Adjust time based on the balloon's timeChange value
     balloons.remove(balloon);
     updateState();
   }
@@ -191,8 +211,6 @@ class GameLogicService {
   void endGame() {
     gameTimer?.cancel();
     balloonGeneratorTimer?.cancel();
-    showInterstitialAd(); // Show the ad after the game ends
-
     showGameOverPopup(); // Show the game over pop-up instead of navigating to another screen
   }
 }

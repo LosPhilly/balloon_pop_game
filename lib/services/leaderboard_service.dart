@@ -21,7 +21,7 @@ class LeaderboardService {
       QuerySnapshot snapshot = await _firestore
           .collection('leaderboard')
           .orderBy('score', descending: true)
-          .limit(10)
+          .limit(100)
           .get();
 
       return snapshot.docs
@@ -49,5 +49,10 @@ class LeaderboardService {
       print('Failed to search for player score: $e');
       return [];
     }
+  }
+
+  Future<int> getTotalPlayers() async {
+    QuerySnapshot snapshot = await _firestore.collection('leaderboard').get();
+    return snapshot.size;
   }
 }
