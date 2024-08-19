@@ -45,5 +45,16 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Add these two keys -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-1135480968301432~9313890103</string> <!-- Replace with your AdMob app ID -->
+
+	<!-- Additional Firebase configuration keys, if needed -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<string>YES</string>
+	<key>GoogleService-Info.plist</key>
+	<string>GoogleService-Info</string>
 </dict>
 </plist>
+
