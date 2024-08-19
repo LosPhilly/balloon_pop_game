@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "330052799001",
+    "project_id": "balloon-pop-ce569",
+    "storage_bucket": "balloon-pop-ce569.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330052799001:android:42bb671e92b0128710b888",
+        "android_client_info": {
+          "package_name": "com.example.balloon_pop_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoyRr0SDYQ3ocekz_q2FIhNY27yGazJ6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,52 @@
+name: balloon_pop_game
+description: A simple and addictive balloon pop game for kids built with Flutter.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.19.0 <3.0.0"
+
+dependencies:
+  audioplayers: ^6.0.0
+  cloud_firestore: ^5.2.1
+  cupertino_icons: ^1.0.2
+  firebase_auth: ^5.1.4
+  firebase_core: ^3.3.0
+  flutter:
+    sdk: flutter
+  flutter_staggered_animations: ^1.1.1
+  flutter_svg: ^1.0.3
+  google_mobile_ads: ^5.1.0
+  google_sign_in: ^6.2.1
+  in_app_purchase: ^3.2.0
+  provider: ^6.1.2
+  shared_preferences: ^2.0.13
+
+dev_dependencies:
+  flutter_lints: ^2.0.1
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.1.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/images/balloons/
+    - assets/images/backgrounds/
+    - assets/sounds/
+    # Optionally, you can specify fonts
+    #fonts:
+    # - family: BalloonFont
+    #  fonts:
+    #   - asset: assets/fonts/BalloonFont-Regular.ttf
+
+# For developers who want to publish the app to Play Store or App Store
+# Specify any platform-specific configurations here.
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon.png"
+  adaptive_icon_background: "assets/images/adaptive_icon_background.png"
+  adaptive_icon_foreground: "assets/images/adaptive_icon_foreground.png"
