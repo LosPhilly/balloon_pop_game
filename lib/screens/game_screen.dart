@@ -68,8 +68,7 @@ class _GameScreenState extends State<GameScreen> {
               onPop: () {
                 popBalloon(balloon);
                 if (gameLogicService.balloons.isEmpty) {
-                  gameLogicService
-                      .endGame(); // Check game over condition when a balloon is popped
+                  gameLogicService.endGame();
                 }
               },
             );
@@ -88,7 +87,7 @@ class _GameScreenState extends State<GameScreen> {
                   icon: Icons.timer,
                   label: 'Time Left',
                   value: '${gameLogicService.timeLeft.toStringAsFixed(1)}s',
-                  color: Colors.redAccent,
+                  color: gameLogicService.timeLeftColor, // Dynamic color
                 ),
 
                 // Score

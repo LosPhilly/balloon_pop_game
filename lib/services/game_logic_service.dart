@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../models/balloon_model.dart';
-import '../widgets/game_over_popup.dart'; // Import the game over pop-up widget
+import '../widgets/game_over_popup.dart';
 
 class GameLogicService {
   int score = 0;
@@ -16,6 +16,8 @@ class GameLogicService {
   Timer? gameTimer;
   Timer? balloonGeneratorTimer;
   BuildContext? context; // To store the context passed from GameScreen
+
+  Color timeLeftColor = Colors.red; // Default time left color
 
   InterstitialAd? _interstitialAd;
   bool isAdRemoved = false;
@@ -76,8 +78,7 @@ class GameLogicService {
 
   void generateBalloon(Function updateState) {
     final random = Random();
-    final size =
-        random.nextDouble() * 50 + 50; // Random size between 50 and 100
+    final size = random.nextDouble() * 70 + 80; // Increased size: 80 to 150
     final xPosition =
         random.nextDouble() * 800; // Replace with MediaQuery for dynamic width
 
@@ -102,8 +103,8 @@ class GameLogicService {
       position: Offset(
           xPosition, 600 - size), // Replace with MediaQuery for dynamic height
       points: size.toInt(),
-      timeChange: timeChange, // New field to handle time addition/subtraction
-      iconPath: timeIcon, // Icon to show on the balloon
+      timeChange: timeChange,
+      iconPath: timeIcon,
     );
 
     balloons.add(balloon);
@@ -117,7 +118,6 @@ class GameLogicService {
     if (timeLeft <= 0) {
       timeLeft = 0; // Prevent the timer from showing negative values
       print('Navigating to game over screen with score: $score');
-
       endGame();
       return;
     }
@@ -171,10 +171,26 @@ class GameLogicService {
   void popBalloon(Balloon balloon, Function updateState) {
     score += balloon.points;
     balloonsPopped++;
-    timeLeft += balloon
-        .timeChange; // Adjust time based on the balloon's timeChange value
+    timeLeft += balloon.timeChange;
+
+    if (balloon.timeChange != 0.0) {
+      _showTimeChangeFeedback(balloon.timeChange > 0, updateState);
+    }
+
     balloons.remove(balloon);
     updateState();
+  }
+
+  void _showTimeChangeFeedback(bool isPositive, Function updateState) {
+    // Temporarily change the color of the time left indicator to green or red
+    timeLeftColor = isPositive ? Colors.green : Colors.red;
+
+    updateState();
+
+    Timer(Duration(seconds: 1), () {
+      timeLeftColor = Colors.red;
+      updateState();
+    });
   }
 
   void showGameOverPopup() {
@@ -187,17 +203,14 @@ class GameLogicService {
             finalScore: score,
             onPlayAgain: () {
               Navigator.of(context).pop(); // Close the dialog
-              // Restart the game
               Navigator.pushReplacementNamed(context, '/game');
             },
             onViewLeaderboard: () {
               Navigator.of(context).pop(); // Close the dialog
-              // Navigate to the leaderboard
               Navigator.pushReplacementNamed(context, '/leaderboard');
             },
             onBackToMenu: () {
               Navigator.of(context).pop(); // Close the dialog
-              // Navigate back to the menu
               Navigator.pushReplacementNamed(context, '/menu');
             },
           );
@@ -211,6 +224,6 @@ class GameLogicService {
   void endGame() {
     gameTimer?.cancel();
     balloonGeneratorTimer?.cancel();
-    showGameOverPopup(); // Show the game over pop-up instead of navigating to another screen
+    showGameOverPopup();
   }
 }
