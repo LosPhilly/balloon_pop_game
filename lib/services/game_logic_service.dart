@@ -26,6 +26,13 @@ class GameLogicService {
     'assets/images/balloons/balloon_red.png',
     'assets/images/balloons/balloon_blue.png',
     'assets/images/balloons/balloon_green.png',
+    'assets/images/balloons/balloon_yellow.png',
+    'assets/images/balloons/balloon_purple.png',
+    'assets/images/balloons/balloon_orange.png',
+    'assets/images/balloons/balloon_gold.png',
+    'assets/images/balloons/balloon_silver.png',
+    'assets/images/balloons/balloon_star.png',
+    'assets/images/balloons/balloon_trick.png',
     // Add more balloon image paths here
   ];
 
