@@ -197,14 +197,18 @@ class _HomeScreenState extends State<HomeScreen> {
           }).toList(),
           // Logo and buttons
           Positioned.fill(
-            child: Center(
+            child: SingleChildScrollView(
+              // Added SingleChildScrollView
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Add the logo at the top
-                  Image.asset(
-                    'assets/images/kids_game.png', // Your logo image
-                    height: 150,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 40.0), // Added padding
+                    child: Image.asset(
+                      'assets/images/kids_game.png', // Your logo image
+                      height: 150,
+                    ),
                   ),
                   SizedBox(height: 50),
                   ElevatedButton(
@@ -365,6 +369,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+                  SizedBox(
+                      height: 20), // Add a bottom spacing to prevent overflow
                 ],
               ),
             ),
