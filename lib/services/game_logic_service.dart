@@ -32,7 +32,7 @@ class GameLogicService {
     'assets/images/balloons/balloon_gold.png',
     'assets/images/balloons/balloon_silver.png',
     'assets/images/balloons/balloon_star.png',
-    'assets/images/balloons/balloon_trick.png',
+    'assets/images/balloons/balloon_trick.png', // Trick balloon that ends the game
     // Add more balloon image paths here
   ];
 
@@ -93,15 +93,23 @@ class GameLogicService {
     final balloonImage = balloonImages[random.nextInt(balloonImages.length)];
 
     // Determine if the balloon will add or subtract time
-    final isTimeBalloon = random.nextBool();
-    final timeChange = isTimeBalloon
-        ? (random.nextBool() ? 2.0 : -2.0)
-        : 0.0; // Add or subtract 2 seconds
-
-    // Select the appropriate icon
+    double timeChange = 0.0;
     String? timeIcon;
-    if (timeChange != 0.0) {
-      timeIcon = timeChange > 0 ? timeIcons[0] : timeIcons[1];
+
+    // Check if the balloon is the trick balloon
+    if (balloonImage == 'assets/images/balloons/balloon_trick.png') {
+      // Trick balloon has no time change or icon
+      timeChange = 0.0;
+    } else {
+      final isTimeBalloon = random.nextBool();
+      timeChange = isTimeBalloon
+          ? (random.nextBool() ? 2.0 : -2.0)
+          : 0.0; // Add or subtract 2 seconds
+
+      // Select the appropriate icon
+      if (timeChange != 0.0) {
+        timeIcon = timeChange > 0 ? timeIcons[0] : timeIcons[1];
+      }
     }
 
     final balloon = Balloon(
@@ -176,12 +184,23 @@ class GameLogicService {
   }
 
   void popBalloon(Balloon balloon, Function updateState) {
+    // If the balloon is the trick balloon, end the game immediately
+    if (balloon.imagePath == 'assets/images/balloons/balloon_trick.png') {
+      endGame();
+      return;
+    }
+
     score += balloon.points;
     balloonsPopped++;
-    timeLeft += balloon.timeChange;
 
-    if (balloon.timeChange != 0.0) {
-      _showTimeChangeFeedback(balloon.timeChange > 0, updateState);
+    // Only decrease time if the balloon has a negative time change
+    if (balloon.timeChange < 0.0) {
+      timeLeft += balloon.timeChange;
+      _showTimeChangeFeedback(false, updateState);
+    } else if (balloon.timeChange > 0.0) {
+      // Increase time if the balloon has a positive time change
+      timeLeft += balloon.timeChange;
+      _showTimeChangeFeedback(true, updateState);
     }
 
     balloons.remove(balloon);
