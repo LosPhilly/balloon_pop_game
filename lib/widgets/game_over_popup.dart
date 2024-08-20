@@ -2,6 +2,7 @@ import 'package:balloon_pop_game/services/leaderboard_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/auth_provider.dart'; // Import AuthProvider
 
 class GameOverPopup extends StatefulWidget {
   final int finalScore;
@@ -22,6 +23,7 @@ class GameOverPopup extends StatefulWidget {
 
 class _GameOverPopupState extends State<GameOverPopup> {
   final TextEditingController nameController = TextEditingController();
+  String? username; // To hold the username if logged in
 
   @override
   void dispose() {
@@ -32,7 +34,11 @@ class _GameOverPopupState extends State<GameOverPopup> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
     bool isNightMode = themeProvider.isNightMode;
+    bool isGuest = authProvider.isGuest;
+    username =
+        authProvider.user?.displayName ?? 'Guest'; // Get username if logged in
 
     return AlertDialog(
       backgroundColor: isNightMode ? Colors.black : Colors.white,
@@ -59,24 +65,35 @@ class _GameOverPopupState extends State<GameOverPopup> {
             ),
           ),
           const SizedBox(height: 20),
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(
-              labelText: 'Enter your name',
-              border: const OutlineInputBorder(),
-              labelStyle: TextStyle(
-                color: isNightMode ? Colors.white : Colors.black,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
+          if (isGuest)
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Enter your name',
+                border: const OutlineInputBorder(),
+                labelStyle: TextStyle(
                   color: isNightMode ? Colors.white : Colors.black,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: isNightMode ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+              style: TextStyle(
+                color: isNightMode ? Colors.white : Colors.black,
+              ),
+            )
+          else
+            Text(
+              'Player: $username',
+              style: TextStyle(
+                color: isNightMode ? Colors.white : Colors.black,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Comic Sans MS',
               ),
             ),
-            style: TextStyle(
-              color: isNightMode ? Colors.white : Colors.black,
-            ),
-          ),
           const SizedBox(height: 30),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -88,8 +105,11 @@ class _GameOverPopupState extends State<GameOverPopup> {
               elevation: 5,
             ),
             onPressed: () async {
-              final playerName = nameController.text.trim();
-              if (playerName.isNotEmpty) {
+              final playerName = isGuest
+                  ? nameController.text.trim()
+                  : username; // Use entered name or username
+
+              if (playerName!.isNotEmpty) {
                 await submitScore(playerName);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -97,10 +117,8 @@ class _GameOverPopupState extends State<GameOverPopup> {
                       content: Text('Score has been added successfully!'),
                     ),
                   );
-                  // Keep the dialog open and don't restart the game
                 }
               } else {
-                // Show a message to enter a name
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -221,7 +239,6 @@ class _GameOverPopupState extends State<GameOverPopup> {
     final leaderboardService = LeaderboardService();
     try {
       await leaderboardService.submitScore(playerName, widget.finalScore);
-      // Safely show a SnackBar only if the widget is still active
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Score submitted successfully'),
@@ -229,7 +246,6 @@ class _GameOverPopupState extends State<GameOverPopup> {
       }
     } catch (e) {
       if (mounted) {
-        // Handle errors during submission and show a SnackBar if the widget is still active
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Failed to submit score. Please try again.'),
         ));

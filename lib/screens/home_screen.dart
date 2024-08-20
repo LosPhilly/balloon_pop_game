@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import 'dart:math';
 import '../providers/theme_provider.dart';
-import '../providers/auth_provider.dart'; // Import AuthProvider
+import '../providers/auth_provider.dart';
 import '../models/home_screen_balloon_model.dart';
-import '../widgets/home_screen_balloon_widget.dart'; // Import the new widget
+import '../widgets/home_screen_balloon_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -47,7 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
       'assets/images/balloons/balloon_silver.png',
       'assets/images/balloons/balloon_star.png',
       'assets/images/balloons/balloon_trick.png',
-      // Add more balloon image paths here
     ];
 
     final balloonImage = balloonImages[random.nextInt(balloonImages.length)];
@@ -85,6 +84,85 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _showSignInDialog(bool isGuest) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final themeProvider = Provider.of<ThemeProvider>(context);
+        bool isNightMode = themeProvider.isNightMode;
+
+        return AlertDialog(
+          backgroundColor: isNightMode ? Colors.black87 : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Sign In Required',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: isNightMode ? Colors.white : Colors.black,
+              fontFamily: 'Comic Sans MS',
+            ),
+          ),
+          content: Text(
+            'You must be signed in to access this feature.',
+            style: TextStyle(
+              fontSize: 18,
+              color: isNightMode ? Colors.white70 : Colors.black87,
+              fontFamily: 'Comic Sans MS',
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor:
+                    isNightMode ? Colors.grey[800] : Colors.grey[300],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: isNightMode ? Colors.white70 : Colors.black87,
+                  fontFamily: 'Comic Sans MS',
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor:
+                    isNightMode ? Colors.blueAccent : Colors.orangeAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text(
+                'Sign In',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                  fontFamily: 'Comic Sans MS',
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, '/login');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -94,8 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Choose a background image based on the theme
     final backgroundImage = isNightMode
-        ? 'assets/images/dark/sky_dark_1.png' // Dark theme background
-        : 'assets/images/light/sky_1.png'; // Light theme background
+        ? 'assets/images/dark/sky_dark_1.png'
+        : 'assets/images/light/sky_1.png';
 
     return Scaffold(
       body: Stack(
@@ -117,12 +195,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }).toList(),
-          // Buttons
+          // Logo and buttons
           Positioned.fill(
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Add the logo at the top
+                  Image.asset(
+                    'assets/images/kids_game.png', // Your logo image
+                    height: 150,
+                  ),
+                  SizedBox(height: 50),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.pinkAccent,
@@ -147,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Comic Sans MS', // Playful font
+                            fontFamily: 'Comic Sans MS',
                           ),
                         ),
                       ],
@@ -178,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.black,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Comic Sans MS', // Playful font
+                            fontFamily: 'Comic Sans MS',
                           ),
                         ),
                       ],
@@ -187,9 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isGuest
-                          ? Colors.grey
-                          : Colors.orangeAccent, // Disable for guest
+                      backgroundColor: Colors.orangeAccent,
                       padding:
                           EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                       shape: RoundedRectangleBorder(
@@ -198,25 +280,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       elevation: 5,
                     ),
                     onPressed: isGuest
-                        ? null
+                        ? () => _showSignInDialog(isGuest)
                         : () {
                             Navigator.pushNamed(context, '/achievements');
                           },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.star,
-                            color: isGuest
-                                ? Colors.white54
-                                : Colors.white), // Disabled color
+                        Icon(Icons.star, color: Colors.white),
                         SizedBox(width: 10),
                         Text(
                           'Achievements',
                           style: TextStyle(
-                            color: isGuest ? Colors.white54 : Colors.white,
+                            color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Comic Sans MS', // Playful font
+                            fontFamily: 'Comic Sans MS',
                           ),
                         ),
                       ],
@@ -225,9 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isGuest
-                          ? Colors.grey
-                          : Colors.blueAccent, // Disable for guest
+                      backgroundColor: Colors.blueAccent,
                       padding:
                           EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                       shape: RoundedRectangleBorder(
@@ -236,25 +313,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       elevation: 5,
                     ),
                     onPressed: isGuest
-                        ? null
+                        ? () => _showSignInDialog(isGuest)
                         : () {
                             Navigator.pushNamed(context, '/profile');
-                          }, // Navigate to Profile
+                          },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.person,
-                            color: isGuest
-                                ? Colors.white54
-                                : Colors.white), // Disabled color
+                        Icon(Icons.person, color: Colors.white),
                         SizedBox(width: 10),
                         Text(
                           'My Stats',
                           style: TextStyle(
-                            color: isGuest ? Colors.white54 : Colors.white,
+                            color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Comic Sans MS', // Playful font
+                            fontFamily: 'Comic Sans MS',
                           ),
                         ),
                       ],
@@ -285,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Comic Sans MS', // Playful font
+                            fontFamily: 'Comic Sans MS',
                           ),
                         ),
                       ],

@@ -16,9 +16,6 @@ void main() async {
   await Firebase.initializeApp();
   MobileAds.instance.initialize(); // Initialize Google Mobile Ads
 
-  // Check if the user is logged in
-  final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-
   runApp(
     MultiProvider(
       providers: [
@@ -26,16 +23,12 @@ void main() async {
         ChangeNotifierProvider(
             create: (_) => AuthProvider()), // AuthProvider added
       ],
-      child: BalloonPopGame(isLoggedIn: isLoggedIn),
+      child: BalloonPopGame(),
     ),
   );
 }
 
 class BalloonPopGame extends StatefulWidget {
-  final bool isLoggedIn;
-
-  BalloonPopGame({required this.isLoggedIn});
-
   @override
   _BalloonPopGameState createState() => _BalloonPopGameState();
 }
@@ -69,13 +62,16 @@ class _BalloonPopGameState extends State<BalloonPopGame> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
+    return Consumer2<ThemeProvider, AuthProvider>(
+      builder: (context, themeProvider, authProvider, child) {
+        // Check if the user is already logged in
+        bool isLoggedIn = authProvider.user != null;
+
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Balloon Pop Game',
           theme: themeProvider.themeData,
-          initialRoute: widget.isLoggedIn ? '/' : '/signup',
+          initialRoute: isLoggedIn ? 'signup' : '/',
           onGenerateRoute: Routes.generateRoute,
         );
       },

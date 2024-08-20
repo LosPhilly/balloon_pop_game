@@ -1,3 +1,4 @@
+import 'package:balloon_pop_game/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/game_screen.dart';
@@ -6,8 +7,8 @@ import 'screens/achievements_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/game_over_screen.dart';
 import 'screens/sign_up_screen.dart';
-//import 'screens/login_screen.dart';  // Import the Login screen
 import 'screens/profile_screen.dart';
+import 'screens/user_sign_up_screen.dart'; // Import the UserSignUpScreen
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -26,11 +27,14 @@ class Routes {
         return MaterialPageRoute(builder: (_) => GameOverScreen());
       case '/signup':
         return MaterialPageRoute(builder: (_) => SignUpScreen());
-      /* case '/login':  // Define the Login route
-        return MaterialPageRoute(builder: (_) => LoginScreen());
-      */
       case '/profile':
         return MaterialPageRoute(builder: (_) => ProfilePage());
+      case '/user_signup':
+        return MaterialPageRoute(
+            builder: (_) =>
+                UserSignUpScreen()); // Add the route for UserSignUpScreen
+      case '/login': // Define the Login route
+        return MaterialPageRoute(builder: (_) => LoginScreen());
       default:
         return MaterialPageRoute(builder: (_) => HomeScreen());
     }

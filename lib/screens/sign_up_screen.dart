@@ -1,3 +1,4 @@
+import 'package:balloon_pop_game/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,6 +43,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       'assets/images/balloons/balloon_red.png',
       'assets/images/balloons/balloon_blue.png',
       'assets/images/balloons/balloon_green.png',
+      'assets/images/balloons/balloon_yellow.png',
+      'assets/images/balloons/balloon_purple.png',
+      'assets/images/balloons/balloon_orange.png',
+      'assets/images/balloons/balloon_gold.png',
+      'assets/images/balloons/balloon_silver.png',
+      'assets/images/balloons/balloon_star.png',
+      'assets/images/balloons/balloon_trick.png', // Trick balloon that ends the game
       // Add more balloon image paths here
     ];
 
@@ -139,11 +147,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(
-                            context, '/signup'); // Navigate to Sign-Up page
+                        Navigator.pushNamed(context,
+                            '/user_signup'); // Navigate to User Sign-Up page
                       },
                       child: Text(
                         'Sign Up',
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                            context, '/login'); // Navigate to Login page
+                      },
+                      child: Text(
+                        'Login',
                         style: TextStyle(fontSize: 20, color: Colors.white),
                       ),
                     ),
@@ -183,15 +210,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                       onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('isLoggedIn', true);
+                        final authProvider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        authProvider.signInAsGuest();
                         Navigator.pushReplacementNamed(context, '/');
                       },
                       child: Text(
                         'Play as Guest',
                         style: TextStyle(fontSize: 20, color: Colors.white),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

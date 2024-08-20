@@ -190,6 +190,9 @@ class GameLogicService {
       return;
     }
 
+    // Debugging: Ensure the balloon is in the list before trying to remove it
+    print("Balloon exists: ${balloons.contains(balloon)}");
+
     score += balloon.points;
     balloonsPopped++;
 
@@ -203,7 +206,9 @@ class GameLogicService {
       _showTimeChangeFeedback(true, updateState);
     }
 
+    // Remove the balloon and update the state
     balloons.remove(balloon);
+    print("Balloon removed, remaining balloons: ${balloons.length}");
     updateState();
   }
 
