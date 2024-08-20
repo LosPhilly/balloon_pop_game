@@ -68,7 +68,8 @@ class _GameScreenState extends State<GameScreen> {
               onPop: () {
                 popBalloon(balloon);
                 if (gameLogicService.balloons.isEmpty) {
-                  gameLogicService.endGame();
+                  gameLogicService
+                      .endGame(); // Check game over condition when a balloon is popped
                 }
               },
             );
