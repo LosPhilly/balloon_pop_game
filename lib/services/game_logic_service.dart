@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/balloon_model.dart';
 import '../widgets/game_over_popup.dart';
+import '../providers/auth_provider.dart';
 
 class GameLogicService {
   int score = 0;
   int level = 1;
   int balloonsPopped = 0; // Track the number of balloons popped per level
   int balloonsRequired = 5; // Balloons required to level up
+  int starBalloonsCollected = 0; // Track the number of star balloons collected
   double timeLeft = 10.0; // Start with 10 seconds for more urgency
   List<Balloon> balloons = [];
   Timer? gameTimer;
@@ -18,57 +20,6 @@ class GameLogicService {
   BuildContext? context; // To store the context passed from GameScreen
 
   Color timeLeftColor = Colors.red; // Default time left color
-
-  InterstitialAd? _interstitialAd;
-  bool isAdRemoved = false;
-
-  final List<String> balloonImages = [
-    'assets/images/balloons/balloon_red.png',
-    'assets/images/balloons/balloon_blue.png',
-    'assets/images/balloons/balloon_green.png',
-    'assets/images/balloons/balloon_yellow.png',
-    'assets/images/balloons/balloon_purple.png',
-    'assets/images/balloons/balloon_orange.png',
-    'assets/images/balloons/balloon_gold.png',
-    'assets/images/balloons/balloon_silver.png',
-    'assets/images/balloons/balloon_star.png',
-    'assets/images/balloons/balloon_trick.png', // Trick balloon that ends the game
-    // Add more balloon image paths here
-  ];
-
-  final List<String> timeIcons = [
-    'assets/images/icons/add_time.png', // Icon to add time
-    'assets/images/icons/subtract_time.png', // Icon to subtract time
-  ];
-
-  void removeAds() {
-    isAdRemoved = true;
-  }
-
-  void loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: 'ca-app-pub-1135480968301432~9313890103', // Test Ad Unit ID
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (InterstitialAd ad) {
-          _interstitialAd = ad;
-          _interstitialAd?.setImmersiveMode(true);
-          print('InterstitialAd loaded successfully');
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          print('InterstitialAd failed to load: $error');
-          _interstitialAd = null;
-        },
-      ),
-    );
-  }
-
-  void showInterstitialAd() {
-    if (_interstitialAd != null && !isAdRemoved) {
-      _interstitialAd?.show();
-      _interstitialAd = null;
-    }
-  }
 
   void startGame(Function updateState, BuildContext context) {
     this.context = context; // Store the context for navigation later
@@ -90,27 +41,7 @@ class GameLogicService {
         random.nextDouble() * 800; // Replace with MediaQuery for dynamic width
 
     // Select a random balloon image from the list
-    final balloonImage = balloonImages[random.nextInt(balloonImages.length)];
-
-    // Determine if the balloon will add or subtract time
-    double timeChange = 0.0;
-    String? timeIcon;
-
-    // Check if the balloon is the trick balloon
-    if (balloonImage == 'assets/images/balloons/balloon_trick.png') {
-      // Trick balloon has no time change or icon
-      timeChange = 0.0;
-    } else {
-      final isTimeBalloon = random.nextBool();
-      timeChange = isTimeBalloon
-          ? (random.nextBool() ? 2.0 : -2.0)
-          : 0.0; // Add or subtract 2 seconds
-
-      // Select the appropriate icon
-      if (timeChange != 0.0) {
-        timeIcon = timeChange > 0 ? timeIcons[0] : timeIcons[1];
-      }
-    }
+    final balloonImage = _getBalloonImage();
 
     final balloon = Balloon(
       imagePath: balloonImage,
@@ -118,12 +49,50 @@ class GameLogicService {
       position: Offset(
           xPosition, 600 - size), // Replace with MediaQuery for dynamic height
       points: size.toInt(),
-      timeChange: timeChange,
-      iconPath: timeIcon,
+      timeChange: _getTimeChangeForBalloon(balloonImage),
+      iconPath: _getTimeIconForBalloon(balloonImage),
     );
 
     balloons.add(balloon);
     updateState();
+  }
+
+  String _getBalloonImage() {
+    final random = Random();
+    final balloonImages = [
+      'assets/images/balloons/balloon_red.png',
+      'assets/images/balloons/balloon_blue.png',
+      'assets/images/balloons/balloon_green.png',
+      'assets/images/balloons/balloon_yellow.png',
+      'assets/images/balloons/balloon_purple.png',
+      'assets/images/balloons/balloon_orange.png',
+      'assets/images/balloons/balloon_gold.png',
+      'assets/images/balloons/balloon_silver.png',
+      'assets/images/balloons/balloon_star.png',
+      'assets/images/balloons/balloon_trick.png',
+    ];
+
+    return balloonImages[random.nextInt(balloonImages.length)];
+  }
+
+  double _getTimeChangeForBalloon(String balloonImage) {
+    if (balloonImage == 'assets/images/balloons/balloon_trick.png') {
+      return 0.0;
+    }
+
+    final random = Random();
+    return random.nextBool() ? (random.nextBool() ? 2.0 : -2.0) : 0.0;
+  }
+
+  String? _getTimeIconForBalloon(String balloonImage) {
+    if (balloonImage == 'assets/images/balloons/balloon_trick.png') {
+      return null;
+    }
+
+    final random = Random();
+    return random.nextBool()
+        ? 'assets/images/icons/add_time.png'
+        : 'assets/images/icons/subtract_time.png';
   }
 
   void updateGameState(Function updateState) {
@@ -132,7 +101,6 @@ class GameLogicService {
     // Check if time has run out
     if (timeLeft <= 0) {
       timeLeft = 0; // Prevent the timer from showing negative values
-      print('Navigating to game over screen with score: $score');
       endGame();
       return;
     }
@@ -164,6 +132,19 @@ class GameLogicService {
         generateBalloon(() {});
       },
     );
+
+    _showLevelUpFeedback();
+  }
+
+  void _showLevelUpFeedback() {
+    if (context != null) {
+      ScaffoldMessenger.of(context!).showSnackBar(
+        SnackBar(
+          content: Text('Level Up! You are now on level $level.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void updateBalloonPositions() {
@@ -190,11 +171,13 @@ class GameLogicService {
       return;
     }
 
-    // Debugging: Ensure the balloon is in the list before trying to remove it
-    print("Balloon exists: ${balloons.contains(balloon)}");
-
     score += balloon.points;
     balloonsPopped++;
+
+    // Track the number of star balloons collected
+    if (balloon.imagePath == 'assets/images/balloons/balloon_star.png') {
+      starBalloonsCollected++;
+    }
 
     // Only decrease time if the balloon has a negative time change
     if (balloon.timeChange < 0.0) {
@@ -208,8 +191,43 @@ class GameLogicService {
 
     // Remove the balloon and update the state
     balloons.remove(balloon);
-    print("Balloon removed, remaining balloons: ${balloons.length}");
+
+    // Update user stats if logged in
+    final authProvider = Provider.of<AuthProvider>(context!, listen: false);
+    if (!authProvider.isGuest) {
+      _updateUserStats(balloon, authProvider.user?.uid);
+    }
+
     updateState();
+  }
+
+  Future<void> _updateUserStats(Balloon balloon, String? userId) async {
+    if (userId == null) return;
+
+    final userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(userId);
+    final userData = await userDocRef.get();
+    if (!userData.exists) return;
+
+    final currentStats = userData.data() as Map<String, dynamic>;
+
+    // Update balloon type count
+    final balloonType = balloon.imagePath.split('/').last.split('.').first;
+    currentStats['balloonStats'][balloonType] += 1;
+    currentStats['balloonsPopped'] += 1;
+
+    // Update score
+    currentStats['score'] = score;
+
+    // Check for leveling up based on star balloons collected
+    if (starBalloonsCollected >= level * 10) {
+      level++;
+      currentStats['level'] = level;
+      _showLevelUpFeedback();
+    }
+
+    // Save updated stats
+    await userDocRef.update(currentStats);
   }
 
   void _showTimeChangeFeedback(bool isPositive, Function updateState) {

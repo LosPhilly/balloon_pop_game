@@ -6,6 +6,7 @@ import '../services/leaderboard_service.dart';
 import '../services/game_logic_service.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/auth_provider.dart';
 
 class GameScreen extends StatefulWidget {
   @override
@@ -38,12 +39,17 @@ class _GameScreenState extends State<GameScreen> {
   void popBalloon(Balloon balloon) {
     gameLogicService.popBalloon(balloon, updateState);
 
-    // Additional logic if needed (e.g., checking achievements, etc.)
+    // Check for achievements based on the current score and star balloons collected
+    achievementsService.checkForAchievements(
+      gameLogicService.score,
+      gameLogicService.starBalloonsCollected,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
     bool isNightMode = themeProvider.isNightMode;
 
     // Choose a background image based on the theme
@@ -109,6 +115,15 @@ class _GameScreenState extends State<GameScreen> {
               ],
             ),
           ),
+
+          // Display user stats (if logged in)
+          if (!authProvider.isGuest)
+            Positioned(
+              top: 20,
+              right: 20,
+              child:
+                  _buildUserStats(authProvider.user?.displayName ?? 'Player'),
+            ),
         ],
       ),
     );
@@ -157,6 +172,37 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserStats(String username) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.blueAccent.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            offset: Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.person, color: Colors.white, size: 30),
+          SizedBox(width: 8),
+          Text(
+            username,
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
