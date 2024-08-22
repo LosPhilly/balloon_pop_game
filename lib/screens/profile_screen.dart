@@ -57,36 +57,48 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           // Profile content
-          Center(
-            child: authProvider.isGuest
-                ? _buildGuestView(context, isNightMode)
-                : FutureBuilder<DocumentSnapshot>(
-                    future: authProvider.getUserStats(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
+          Positioned.fill(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding:
+                    const EdgeInsets.only(top: 100), // Add padding at the top
+                child: Center(
+                  child: authProvider.isGuest
+                      ? _buildGuestView(context, isNightMode)
+                      : FutureBuilder<DocumentSnapshot>(
+                          future: authProvider.getUserStats(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            }
 
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error loading profile'));
-                      }
+                            if (snapshot.hasError) {
+                              return Center(
+                                  child: Text('Error loading profile'));
+                            }
 
-                      if (!snapshot.hasData || snapshot.data == null) {
-                        return Center(child: Text('No profile data found'));
-                      }
+                            if (!snapshot.hasData || snapshot.data == null) {
+                              return Center(
+                                  child: Text('No profile data found'));
+                            }
 
-                      final userData = snapshot.data!;
+                            final userData = snapshot.data!;
 
-                      return _buildProfileView(context, userData, isNightMode);
-                    },
-                  ),
+                            return _buildProfileView(
+                                context, userData, isNightMode);
+                          },
+                        ),
+                ),
+              ),
+            ),
           ),
           // Floating back button
           Positioned(
-            top: 40,
-            left: 20,
+            top: 50,
+            left: 10,
             child: FloatingActionButton(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: Colors.pinkAccent,
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -111,7 +123,7 @@ class ProfilePage extends StatelessWidget {
         Text(
           'Guest User',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: isNightMode ? Colors.white : Colors.black,
           ),
@@ -121,7 +133,7 @@ class ProfilePage extends StatelessWidget {
           'You are currently logged in as a guest.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             color: isNightMode ? Colors.white70 : Colors.grey,
           ),
         ),
@@ -132,14 +144,14 @@ class ProfilePage extends StatelessWidget {
           },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Colors.pinkAccent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
           ),
           child: Text(
             'Sign Up',
-            style: TextStyle(fontSize: 18, color: Colors.white),
+            style: TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
       ],
@@ -152,26 +164,26 @@ class ProfilePage extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Card(
-          elevation: 4,
+          elevation: 6,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
           color: isNightMode ? Colors.grey[800] : Colors.white,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
                   leading: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.blueAccent,
-                    child: Icon(Icons.person, size: 40, color: Colors.white),
+                    radius: 35,
+                    backgroundColor: Colors.pinkAccent,
+                    child: Icon(Icons.person, size: 45, color: Colors.white),
                   ),
                   title: Text(
                     userData['username'],
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: isNightMode ? Colors.white : Colors.black,
                     ),
@@ -179,7 +191,7 @@ class ProfilePage extends StatelessWidget {
                   subtitle: Text(
                     userData['email'],
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       color: isNightMode ? Colors.white70 : Colors.grey[700],
                     ),
                   ),
@@ -189,11 +201,11 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         SizedBox(height: 20),
-        _buildStatCard(
-            'Score', userData['score'].toString(), Icons.score, isNightMode),
+        _buildStatCard('Total Score', userData['score'].toString(),
+            Icons.emoji_events, isNightMode),
         SizedBox(height: 10),
-        _buildStatCard('Level', userData['level'].toString(), Icons.trending_up,
-            isNightMode),
+        _buildStatCard('Current Level', userData['level'].toString(),
+            Icons.star_rate, isNightMode),
         SizedBox(height: 20),
         _buildBalloonStats(userData['balloonStats'], isNightMode),
         SizedBox(height: 20),
@@ -205,11 +217,11 @@ class ProfilePage extends StatelessWidget {
           icon: Icon(Icons.share, color: Colors.white),
           label: Text(
             'Share My Stats',
-            style: TextStyle(fontSize: 18, color: Colors.white),
+            style: TextStyle(fontSize: 20, color: Colors.white),
           ),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Colors.pinkAccent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
@@ -222,18 +234,18 @@ class ProfilePage extends StatelessWidget {
   Widget _buildStatCard(
       String title, String value, IconData icon, bool isNightMode) {
     return Card(
-      elevation: 3,
+      elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
       color: isNightMode ? Colors.grey[800] : Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.blueAccent,
-              child: Icon(icon, color: Colors.white),
+              backgroundColor: Colors.pinkAccent,
+              child: Icon(icon, color: Colors.white, size: 30),
             ),
             SizedBox(width: 20),
             Column(
@@ -242,14 +254,14 @@ class ProfilePage extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       color: isNightMode ? Colors.white70 : Colors.grey[700]),
                 ),
                 SizedBox(height: 5),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: isNightMode ? Colors.white : Colors.black,
                   ),
@@ -265,28 +277,28 @@ class ProfilePage extends StatelessWidget {
   Widget _buildBalloonStats(
       Map<String, dynamic> balloonStats, bool isNightMode) {
     return Card(
-      elevation: 3,
+      elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
       color: isNightMode ? Colors.grey[800] : Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Balloon Stats',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+                color: Colors.pinkAccent,
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Wrap(
-              spacing: 10,
-              runSpacing: 10,
+              spacing: 12,
+              runSpacing: 12,
               children: balloonStats.entries.map((entry) {
                 final balloonType = entry.key.toLowerCase();
                 final balloonIcon = balloonIcons[balloonType];
@@ -295,12 +307,12 @@ class ProfilePage extends StatelessWidget {
                 return Chip(
                   avatar: CircleAvatar(
                     backgroundColor: balloonColor,
-                    child: Icon(balloonIcon, color: Colors.white),
+                    child: Icon(balloonIcon, color: Colors.white, size: 20),
                   ),
                   label: Text(
                     '${capitalize(entry.key)}: ${entry.value}',
                     style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         color: isNightMode ? Colors.white : Colors.blueAccent),
                   ),
                   backgroundColor: isNightMode
@@ -324,8 +336,8 @@ class ProfilePage extends StatelessWidget {
     final shareContent = StringBuffer();
     shareContent.writeln("Check out my stats on Balloon Pop Game!");
     shareContent.writeln("Username: $username");
-    shareContent.writeln("Score: $score");
-    shareContent.writeln("Level: $level");
+    shareContent.writeln("Total Score: $score");
+    shareContent.writeln("Current Level: $level");
     shareContent.writeln("Balloon Stats:");
     balloonStats.forEach((key, value) {
       shareContent.writeln("${capitalize(key)}: $value");

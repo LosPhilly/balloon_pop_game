@@ -13,49 +13,45 @@ class AchievementWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isUnlocked ? Colors.greenAccent : Colors.grey,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
+    return Card(
+      color: isUnlocked ? Colors.lightGreen : Colors.grey[300],
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
       ),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            isUnlocked ? Icons.star : Icons.lock,
-            size: 50,
-            color: isUnlocked ? Colors.yellow : Colors.white,
-          ),
-          SizedBox(height: 10),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontFamily: 'Comic Sans MS',
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isUnlocked ? Icons.check_circle : Icons.lock,
+              color: isUnlocked ? Colors.white : Colors.grey,
+              size: 40,
             ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
+            SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isUnlocked ? Colors.white : Colors.grey,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            SizedBox(height: 5),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 14,
+                color: isUnlocked ? Colors.white70 : Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -116,6 +116,9 @@ class _UserSignUpScreenState extends State<UserSignUpScreen> {
         // Update the display name in Firebase Auth
         await userCredential.user?.updateDisplayName(username);
 
+        // Initialize achievements
+        List<Map<String, dynamic>> initialAchievements = [];
+
         // Store user profile information in Firestore
         await FirebaseFirestore.instance
             .collection('users')
@@ -138,6 +141,7 @@ class _UserSignUpScreenState extends State<UserSignUpScreen> {
             'star': 0,
             'trick': 0,
           }, // Stats for each balloon type
+          'achievements': initialAchievements, // Initial achievements list
         });
 
         Navigator.pushReplacementNamed(context, '/home');

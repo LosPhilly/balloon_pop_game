@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/balloon_model.dart';
 import '../widgets/game_over_popup.dart';
 import '../providers/auth_provider.dart';
+import '../services/achievements_service.dart';
 
 class GameLogicService {
   int score = 0;
@@ -18,6 +19,9 @@ class GameLogicService {
   Timer? gameTimer;
   Timer? balloonGeneratorTimer;
   BuildContext? context; // To store the context passed from GameScreen
+
+  final AchievementsService achievementsService =
+      AchievementsService(); // Instantiate AchievementsService
 
   Color timeLeftColor = Colors.red; // Default time left color
 
@@ -134,6 +138,9 @@ class GameLogicService {
     );
 
     _showLevelUpFeedback();
+
+    // Check for level-related achievements
+    achievementsService.checkForAchievements(score, starBalloonsCollected);
   }
 
   void _showLevelUpFeedback() {
@@ -199,6 +206,51 @@ class GameLogicService {
     }
 
     updateState();
+
+    // Check for all relevant achievements
+    _checkAchievements();
+  }
+
+  void _checkAchievements() {
+    achievementsService.checkForAchievements(score, starBalloonsCollected);
+
+    // Check specific achievements
+    if (balloonsPopped == 1) {
+      achievementsService.unlockAchievement(
+        'First Pop!',
+        'Pop your first balloon',
+      );
+    }
+
+    if (balloonsPopped >= 100) {
+      achievementsService.unlockAchievement(
+        'Pop Master',
+        'Pop 100 balloons',
+      );
+    }
+
+    if (balloonsPopped >= 500) {
+      achievementsService.unlockAchievement(
+        'Pop Pro',
+        'Pop 500 balloons',
+      );
+    }
+
+    if (balloonsPopped >= 1000) {
+      achievementsService.unlockAchievement(
+        'Balloon Buster',
+        'Pop 1000 balloons',
+      );
+    }
+
+    if (score >= 1000) {
+      achievementsService.unlockAchievement(
+        'Pop Legend',
+        'Score over 1000 points in a single game',
+      );
+    }
+
+    // Add more specific checks here as needed
   }
 
   Future<void> _updateUserStats(Balloon balloon, String? userId) async {
@@ -211,13 +263,18 @@ class GameLogicService {
 
     final currentStats = userData.data() as Map<String, dynamic>;
 
-    // Update balloon type count
+    // Ensure 'balloonStats' and the specific balloon type key exist
+    Map<String, dynamic> balloonStats = currentStats['balloonStats'] ?? {};
     final balloonType = balloon.imagePath.split('/').last.split('.').first;
-    currentStats['balloonStats'][balloonType] += 1;
-    currentStats['balloonsPopped'] += 1;
 
-    // Update score
-    currentStats['score'] = score;
+    // Initialize the balloon type count if it doesn't exist
+    balloonStats[balloonType] = (balloonStats[balloonType] ?? 0) + 1;
+
+    // Increment the total balloons popped
+    currentStats['balloonsPopped'] = (currentStats['balloonsPopped'] ?? 0) + 1;
+
+    // Update the score
+    currentStats['score'] = (currentStats['score'] ?? 0) + score;
 
     // Check for leveling up based on star balloons collected
     if (starBalloonsCollected >= level * 10) {
@@ -226,8 +283,13 @@ class GameLogicService {
       _showLevelUpFeedback();
     }
 
-    // Save updated stats
-    await userDocRef.update(currentStats);
+    // Save the updated stats back to Firestore
+    await userDocRef.update({
+      'balloonStats': balloonStats,
+      'balloonsPopped': currentStats['balloonsPopped'],
+      'score': currentStats['score'],
+      'level': currentStats['level'],
+    });
   }
 
   void _showTimeChangeFeedback(bool isPositive, Function updateState) {
@@ -274,5 +336,8 @@ class GameLogicService {
     gameTimer?.cancel();
     balloonGeneratorTimer?.cancel();
     showGameOverPopup();
+
+    // Check for game-ending achievements
+    _checkAchievements();
   }
 }
