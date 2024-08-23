@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -22,7 +24,15 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<string>YES</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-1135480968301432~9313890103</string>
+	<key>GoogleService-Info.plist</key>
+	<string>GoogleService-Info</string>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -41,20 +51,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-
-	<!-- Add these two keys -->
-	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-1135480968301432~9313890103</string> <!-- Replace with your AdMob app ID -->
-
-	<!-- Additional Firebase configuration keys, if needed -->
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<string>YES</string>
-	<key>GoogleService-Info.plist</key>
-	<string>GoogleService-Info</string>
 </dict>
 </plist>
-
