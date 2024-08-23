@@ -104,6 +104,34 @@ class _GameOverPopupState extends State<GameOverPopup> {
               ),
               elevation: 5,
             ),
+            onPressed: widget.onPlayAgain,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.refresh, color: Colors.black),
+                SizedBox(width: 10),
+                Text(
+                  'Play Again',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Comic Sans MS',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
+              elevation: 5,
+            ),
             onPressed: () async {
               final playerName = isGuest
                   ? nameController.text.trim()
@@ -166,34 +194,6 @@ class _GameOverPopupState extends State<GameOverPopup> {
                   'Leaderboard',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Comic Sans MS',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.greenAccent,
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-              elevation: 5,
-            ),
-            onPressed: widget.onPlayAgain,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.refresh, color: Colors.black),
-                SizedBox(width: 10),
-                Text(
-                  'Play Again',
-                  style: TextStyle(
-                    color: Colors.black,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Comic Sans MS',
