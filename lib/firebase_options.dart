@@ -51,17 +51,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyB2gQIGZpSw45veGskq3i356Wno1UEeVeQ',
-    appId: '1:827039476352:ios:8a788d8fd9541815419465',
+    appId: '1:827039476352:ios:a30c91bcd0769e2b419465',
     messagingSenderId: '827039476352',
     projectId: 'balloon-pop-19858',
     storageBucket: 'balloon-pop-19858.appspot.com',
-    iosClientId: '827039476352-4br9qp813aj4o5n6r4atpmgv4icgj88n.apps.googleusercontent.com',
-    iosBundleId: 'com.example.balloonPopGame',
+    iosClientId: '827039476352-8sg52gslf3fukddvlikaodmjrfmtlt2h.apps.googleusercontent.com',
+    iosBundleId: 'com.balloon.pop.game',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCgynIJkYwFiIM37uLzl5V3GRAcuvscSOc',
-    appId: '1:827039476352:android:a628694c5bc0cdd0419465',
+    appId: '1:827039476352:android:5e4ed628b2649e56419465',
     messagingSenderId: '827039476352',
     projectId: 'balloon-pop-19858',
     storageBucket: 'balloon-pop-19858.appspot.com',

@@ -66,12 +66,13 @@ class _BalloonPopGameState extends State<BalloonPopGame> {
       builder: (context, themeProvider, authProvider, child) {
         // Check if the user is already logged in
         bool isLoggedIn = authProvider.user != null;
+        bool signedInAsGuest = authProvider.isGuest;
 
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Balloon Pop Game',
           theme: themeProvider.themeData,
-          initialRoute: isLoggedIn ? 'signup' : '/',
+          initialRoute: isLoggedIn && !signedInAsGuest ? '/home' : '/signup',
           onGenerateRoute: Routes.generateRoute,
         );
       },

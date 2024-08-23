@@ -1,4 +1,5 @@
-import 'package:balloon_pop_game/providers/auth_provider.dart';
+import 'package:balloon_pop/providers/auth_provider.dart';
+import 'package:balloon_pop/providers/auth_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -300,7 +301,8 @@ class ProfilePage extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: balloonStats.entries.map((entry) {
-                final balloonType = entry.key.toLowerCase();
+                final balloonType =
+                    entry.key.replaceAll('balloon_', '').toLowerCase();
                 final balloonIcon = balloonIcons[balloonType];
                 final balloonColor = balloonColors[balloonType];
 
@@ -310,7 +312,7 @@ class ProfilePage extends StatelessWidget {
                     child: Icon(balloonIcon, color: Colors.white, size: 20),
                   ),
                   label: Text(
-                    '${capitalize(entry.key)}: ${entry.value}',
+                    '${capitalize(balloonType)}: ${entry.value}',
                     style: TextStyle(
                         fontSize: 18,
                         color: isNightMode ? Colors.white : Colors.blueAccent),

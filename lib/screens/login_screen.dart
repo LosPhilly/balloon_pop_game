@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart'
     as MyAuthProvider; // Alias for your AuthProvider
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:balloon_pop_game/providers/theme_provider.dart';
+import 'package:balloon_pop/providers/theme_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

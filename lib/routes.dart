@@ -1,4 +1,4 @@
-import 'package:balloon_pop_game/screens/login_screen.dart';
+import 'package:balloon_pop/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/game_screen.dart';

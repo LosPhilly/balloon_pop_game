@@ -340,38 +340,37 @@ class GameLogicService {
 
     final userDocRef =
         FirebaseFirestore.instance.collection('users').doc(userId);
-    final userData = await userDocRef.get();
-    if (!userData.exists) return;
 
-    final currentStats = userData.data() as Map<String, dynamic>;
+    final balloonType = balloon.imagePath
+        .split('/')
+        .last
+        .split('.')
+        .first
+        .replaceAll('balloon_', '')
+        .toLowerCase();
 
-    // Ensure 'balloonStats' and the specific balloon type key exist
-    Map<String, dynamic> balloonStats = currentStats['balloonStats'] ?? {};
-    final balloonType = balloon.imagePath.split('/').last.split('.').first;
-
-    // Initialize the balloon type count if it doesn't exist
-    balloonStats[balloonType] = (balloonStats[balloonType] ?? 0) + 1;
-
-    // Increment the total balloons popped
-    currentStats['balloonsPopped'] = (currentStats['balloonsPopped'] ?? 0) + 1;
-
-    // Update the score
-    currentStats['score'] = (currentStats['score'] ?? 0) + score;
+    // Update the specific balloon stat directly in Firestore
+    await userDocRef.update({
+      'balloonStats.$balloonType': FieldValue.increment(1),
+      'balloonsPopped': FieldValue.increment(1),
+      'score': FieldValue.increment(score),
+    });
 
     // Check for leveling up based on star balloons collected
-    if (starBalloonsCollected >= level * 10) {
-      level++;
-      currentStats['level'] = level;
-      _showLevelUpFeedback();
-    }
+    final userSnapshot = await userDocRef.get();
+    final userData = userSnapshot.data() as Map<String, dynamic>?;
 
-    // Save the updated stats back to Firestore
-    await userDocRef.update({
-      'balloonStats': balloonStats,
-      'balloonsPopped': currentStats['balloonsPopped'],
-      'score': currentStats['score'],
-      'level': currentStats['level'],
-    });
+    if (userData != null) {
+      final currentLevel = userData['level'] ?? 1;
+      final starBalloonsCollected = userData['balloonStats']['star'] ?? 0;
+
+      if (starBalloonsCollected >= currentLevel * 10) {
+        await userDocRef.update({
+          'level': FieldValue.increment(1),
+        });
+        _showLevelUpFeedback();
+      }
+    }
   }
 
   void showGameOverPopup() {

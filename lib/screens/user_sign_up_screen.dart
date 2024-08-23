@@ -1,4 +1,4 @@
-import 'package:balloon_pop_game/providers/theme_provider.dart';
+import 'package:balloon_pop/providers/theme_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';

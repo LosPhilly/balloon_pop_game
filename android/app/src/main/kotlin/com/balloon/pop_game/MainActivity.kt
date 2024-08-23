@@ -1,4 +1,4 @@
-package com.balloon.pop_game
+package com.balloon.pop.game
 
 import io.flutter.embedding.android.FlutterActivity
 

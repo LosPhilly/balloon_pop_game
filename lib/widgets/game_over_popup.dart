@@ -1,4 +1,4 @@
-import 'package:balloon_pop_game/services/leaderboard_service.dart';
+import 'package:balloon_pop/services/leaderboard_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';

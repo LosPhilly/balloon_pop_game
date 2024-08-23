@@ -14,9 +14,19 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider() {
     // Listen to auth state changes to handle login/logout automatically
-    _auth.authStateChanges().listen((User? user) {
+    _auth.authStateChanges().listen((User? user) async {
       _user = user;
-      _isGuest = user == null;
+
+      final prefs = await SharedPreferences.getInstance();
+
+      if (_user == null) {
+        // If the user is not authenticated, treat them as a guest
+        _isGuest = true;
+      } else {
+        // If the user is authenticated, check if they were signed in as a guest previously
+        _isGuest = prefs.getBool('isGuest') ?? false;
+      }
+
       notifyListeners();
     });
   }
@@ -30,6 +40,10 @@ class AuthProvider with ChangeNotifier {
       );
       _user = userCredential.user;
       _isGuest = false;
+
+      // Save the state to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isGuest', false);
 
       // Store user info in Firestore with initial stats
       await _firestore.collection('users').doc(_user!.uid).set({
@@ -67,6 +81,11 @@ class AuthProvider with ChangeNotifier {
       );
       _user = userCredential.user;
       _isGuest = false;
+
+      // Save the state to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isGuest', false);
+
       notifyListeners();
     } catch (e) {
       print('Sign In Error: $e');
@@ -78,6 +97,11 @@ class AuthProvider with ChangeNotifier {
     try {
       _user = null;
       _isGuest = true;
+
+      // Save guest state to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isGuest', true);
+
       notifyListeners();
     } catch (e) {
       print('Sign In As Guest Error: $e');
@@ -90,11 +114,12 @@ class AuthProvider with ChangeNotifier {
       // Sign out the user from Firebase Auth
       await _auth.signOut();
 
-      // Clear the stored "Remember Me" information from SharedPreferences
+      // Clear the stored "Remember Me" and "isGuest" information from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('email');
       await prefs.remove('password');
       await prefs.remove('rememberMe');
+      await prefs.remove('isGuest'); // Clear guest status
 
       // Clear the local user state
       _user = null;
