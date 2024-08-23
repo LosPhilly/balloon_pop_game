@@ -1,26 +1,79 @@
 {
   "project_info": {
-    "project_number": "330052799001",
-    "project_id": "balloon-pop-ce569",
-    "storage_bucket": "balloon-pop-ce569.appspot.com"
+    "project_number": "827039476352",
+    "project_id": "balloon-pop-19858",
+    "storage_bucket": "balloon-pop-19858.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:330052799001:android:42bb671e92b0128710b888",
+        "mobilesdk_app_id": "1:827039476352:android:a628694c5bc0cdd0419465",
         "android_client_info": {
-          "package_name": "com.example.balloon_pop_game"
+          "package_name": "com.balloon.pop_game"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "827039476352-ejc1v623g577alcfcq7cqks08lb4evcg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAoyRr0SDYQ3ocekz_q2FIhNY27yGazJ6U"
+          "current_key": "AIzaSyCgynIJkYwFiIM37uLzl5V3GRAcuvscSOc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "827039476352-ejc1v623g577alcfcq7cqks08lb4evcg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "827039476352-4br9qp813aj4o5n6r4atpmgv4icgj88n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.balloonPopGame"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827039476352:android:6bf52d0db46b56a9419465",
+        "android_client_info": {
+          "package_name": "com.example.balloon_pop_game"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "827039476352-ejc1v623g577alcfcq7cqks08lb4evcg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgynIJkYwFiIM37uLzl5V3GRAcuvscSOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "827039476352-ejc1v623g577alcfcq7cqks08lb4evcg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "827039476352-4br9qp813aj4o5n6r4atpmgv4icgj88n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.balloonPopGame"
+              }
+            }
+          ]
         }
       }
     }

@@ -24,10 +24,7 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -53,11 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyASYdnwyV0ZbvhCKInIXiVNqZA4yTsDf0E',
-    appId: '1:330052799001:ios:64a360a58964c6bd10b888',
-    messagingSenderId: '330052799001',
-    projectId: 'balloon-pop-ce569',
-    storageBucket: 'balloon-pop-ce569.appspot.com',
+    apiKey: 'AIzaSyB2gQIGZpSw45veGskq3i356Wno1UEeVeQ',
+    appId: '1:827039476352:ios:8a788d8fd9541815419465',
+    messagingSenderId: '827039476352',
+    projectId: 'balloon-pop-19858',
+    storageBucket: 'balloon-pop-19858.appspot.com',
+    iosClientId: '827039476352-4br9qp813aj4o5n6r4atpmgv4icgj88n.apps.googleusercontent.com',
     iosBundleId: 'com.example.balloonPopGame',
   );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCgynIJkYwFiIM37uLzl5V3GRAcuvscSOc',
+    appId: '1:827039476352:android:a628694c5bc0cdd0419465',
+    messagingSenderId: '827039476352',
+    projectId: 'balloon-pop-19858',
+    storageBucket: 'balloon-pop-19858.appspot.com',
+  );
+
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/balloon_model.dart';
@@ -14,7 +15,7 @@ class GameLogicService {
   int balloonsPopped = 0; // Track the number of balloons popped per level
   int balloonsRequired = 5; // Balloons required to level up
   int starBalloonsCollected = 0; // Track the number of star balloons collected
-  double timeLeft = 10.0; // Start with 10 seconds for more urgency
+  double timeLeft = 20.0; // Start with 20 seconds for easier gameplay
   List<Balloon> balloons = [];
   Timer? gameTimer;
   Timer? balloonGeneratorTimer;
@@ -25,13 +26,57 @@ class GameLogicService {
 
   Color timeLeftColor = Colors.red; // Default time left color
 
+  InterstitialAd? _interstitialAd;
+  bool _isInterstitialAdReady = false;
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId:
+          'ca-app-pub-1135480968301432~9313890103', // Replace with your actual Ad Unit ID
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          _interstitialAd = ad;
+          _isInterstitialAdReady = true;
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print('Failed to load an interstitial ad: $error');
+          _isInterstitialAdReady = false;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd(Function onAdClosed) {
+    if (_isInterstitialAdReady) {
+      _interstitialAd?.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (InterstitialAd ad) {
+          ad.dispose();
+          onAdClosed(); // Continue with game over popup after ad
+        },
+        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+          print('Failed to show interstitial ad: $error');
+          ad.dispose();
+          onAdClosed(); // Continue with game over popup even if ad fails
+        },
+      );
+
+      _interstitialAd?.show();
+      _interstitialAd = null;
+      _isInterstitialAdReady = false;
+    } else {
+      onAdClosed(); // If the ad isn't ready, just show the game over popup
+    }
+  }
+
   void startGame(Function updateState, BuildContext context) {
     this.context = context;
     preloadImages(); // Preload images
 
     // Generate balloons at intervals
     balloonGeneratorTimer =
-        Timer.periodic(Duration(milliseconds: 1000), (timer) {
+        Timer.periodic(Duration(milliseconds: 1200), (timer) {
+      // Increased interval for easier gameplay
       generateBalloon(updateState);
     });
 
@@ -62,26 +107,36 @@ class GameLogicService {
   void generateBalloon(Function updateState) {
     final random = Random();
 
-    // Generate more balloons at higher levels
-    int numberOfBalloons =
-        1 + (level ~/ 5); // Increase the number of balloons every 5 levels
+    // Increase the number of balloons generated as the game progresses
+    int numberOfBalloons = 2 + (level ~/ 2); // Increase balloons every 2 levels
 
     for (int i = 0; i < numberOfBalloons; i++) {
       final size =
-          random.nextDouble() * 100 + 120; // Increased size: 120 to 220
-      final xPosition = random.nextDouble() *
-          800; // Replace with MediaQuery for dynamic width
+          random.nextDouble() * 100 + 140; // Larger balloons (140 to 240)
+      final xPosition =
+          random.nextDouble() * MediaQuery.of(context!).size.width;
 
-      final balloonImage = _getBalloonImage();
+      // Adjust the probability of "add time" balloons as levels increase
+      double addTimeProbability =
+          max(0.3 - (level * 0.04), 0.01); // Reduces to a minimum of 5%
+
+      final bool isAddTimeBalloon = random.nextDouble() < addTimeProbability;
+
+      final balloonImage = isAddTimeBalloon
+          ? 'assets/images/balloons/balloon_star.png' // Use specific balloon image
+          : _getBalloonImage();
 
       final balloon = Balloon(
         imagePath: balloonImage,
         size: size,
-        position: Offset(xPosition,
-            600 - size), // Replace with MediaQuery for dynamic height
+        position: Offset(xPosition, MediaQuery.of(context!).size.height - size),
         points: size.toInt(),
-        timeChange: _getTimeChangeForBalloon(balloonImage),
-        iconPath: _getTimeIconForBalloon(balloonImage),
+        timeChange: isAddTimeBalloon
+            ? 3.0
+            : 0.0, // Add time only for "add time" balloons
+        iconPath: isAddTimeBalloon
+            ? 'assets/images/icons/add_time.png'
+            : null, // Show icon for "add time" balloons
       );
 
       balloons.add(balloon);
@@ -109,32 +164,21 @@ class GameLogicService {
   }
 
   double _getTimeChangeForBalloon(String balloonImage) {
-    if (balloonImage == 'assets/images/balloons/balloon_trick.png') {
-      return 0.0;
+    // If it's an "add time" balloon, return the time addition
+    if (balloonImage.contains('add_time')) {
+      return 3.0; // Add 3 seconds
     }
 
-    // Assign specific time change values based on the icon path
-    if (balloonImage.contains('subtract_time')) {
-      return -2.0;
-    } else if (balloonImage.contains('add_time')) {
-      return 2.0;
-    }
-
-    return 0.0;
+    return 0.0; // No time change for other balloons
   }
 
   String? _getTimeIconForBalloon(String balloonImage) {
-    if (balloonImage == 'assets/images/balloons/balloon_trick.png') {
-      return null;
+    // Only show the add time icon for balloons that add time
+    if (balloonImage.contains('add_time')) {
+      return 'assets/images/icons/add_time.png'; // Ensure this path is correct
     }
 
-    // Explicitly assign the correct icon based on time change
-    final random = Random();
-    if (random.nextBool()) {
-      return 'assets/images/icons/subtract_time.png';
-    } else {
-      return 'assets/images/icons/add_time.png';
-    }
+    return null; // No icon for other balloons
   }
 
   void updateGameState(Function updateState) {
@@ -156,8 +200,8 @@ class GameLogicService {
 
   void updateBalloonPositions() {
     balloons = balloons.map((balloon) {
-      // Increase the speed as levels progress
-      final newY = balloon.position.dy - (5 + level * 0.5);
+      // Decrease the speed to make the game easier
+      final newY = balloon.position.dy - (3 + level * 0.3); // Slower speed
       return Balloon(
         imagePath: balloon.imagePath,
         size: balloon.size,
@@ -173,12 +217,7 @@ class GameLogicService {
   }
 
   void popBalloon(Balloon balloon, Function updateState) {
-    // If the balloon is the trick balloon, end the game immediately.
-    if (balloon.imagePath == 'assets/images/balloons/balloon_trick.png') {
-      endGame();
-      return;
-    }
-
+    // No more ending the game when clicking on certain balloons
     score += balloon.points;
     balloonsPopped++;
 
@@ -187,10 +226,10 @@ class GameLogicService {
       starBalloonsCollected++;
     }
 
-    // Only modify time if the timeChange is non-zero.
-    if (balloon.timeChange != 0.0) {
+    // Only modify time if the timeChange is positive
+    if (balloon.timeChange > 0.0) {
       timeLeft += balloon.timeChange;
-      _showTimeChangeFeedback(balloon.timeChange > 0.0, updateState);
+      _showTimeChangeFeedback(true, updateState);
     }
 
     // Remove the balloon and update the state.
@@ -212,12 +251,12 @@ class GameLogicService {
     level++;
     balloonsPopped = 0; // Reset the count for the new level
     balloonsRequired +=
-        3; // Increase the number of balloons needed for the next level
+        5; // Increase the number of balloons required to level up by 5 each time
 
-    // Adjust the balloon generation speed to increase difficulty
+    // Adjust the balloon generation speed to a slower increase in difficulty
     balloonGeneratorTimer?.cancel();
     int generationInterval =
-        max(1000 - level * 100, 200); // Speed up the game as levels increase
+        max(1200 - level * 50, 600); // Slower difficulty increase
     balloonGeneratorTimer = Timer.periodic(
       Duration(milliseconds: generationInterval),
       (timer) {
@@ -243,7 +282,7 @@ class GameLogicService {
   }
 
   void _showTimeChangeFeedback(bool isPositive, Function updateState) {
-    // Temporarily change the color of the time left indicator to green or red
+    // Temporarily change the color of the time left indicator to green
     timeLeftColor = isPositive ? Colors.green : Colors.red;
 
     updateState();
@@ -366,7 +405,14 @@ class GameLogicService {
   void endGame() {
     gameTimer?.cancel();
     balloonGeneratorTimer?.cancel();
-    showGameOverPopup();
+
+    // Load the interstitial ad
+    _loadInterstitialAd();
+
+    // Show the interstitial ad, and after it closes, show the game over popup
+    _showInterstitialAd(() {
+      showGameOverPopup();
+    });
 
     // Check for game-ending achievements
     _checkAchievements();
