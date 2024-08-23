@@ -26,9 +26,12 @@ class GameLogicService {
   Color timeLeftColor = Colors.red; // Default time left color
 
   void startGame(Function updateState, BuildContext context) {
-    this.context = context; // Store the context for navigation later
+    this.context = context;
+    preloadImages(); // Preload images
+
     // Generate balloons at intervals
-    balloonGeneratorTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    balloonGeneratorTimer =
+        Timer.periodic(Duration(milliseconds: 1000), (timer) {
       generateBalloon(updateState);
     });
 
@@ -38,26 +41,52 @@ class GameLogicService {
     });
   }
 
+  void preloadImages() {
+    // Preload balloon images to optimize loading times
+    final balloonImages = [
+      'assets/images/balloons/balloon_red.png',
+      'assets/images/balloons/balloon_blue.png',
+      'assets/images/balloons/balloon_green.png',
+      'assets/images/balloons/balloon_yellow.png',
+      'assets/images/balloons/balloon_purple.png',
+      'assets/images/balloons/balloon_orange.png',
+      'assets/images/balloons/balloon_gold.png',
+      'assets/images/balloons/balloon_silver.png',
+      'assets/images/balloons/balloon_star.png',
+      'assets/images/balloons/balloon_trick.png',
+    ];
+
+    // This could be used to preload if needed
+  }
+
   void generateBalloon(Function updateState) {
     final random = Random();
-    final size = random.nextDouble() * 70 + 80; // Increased size: 80 to 150
-    final xPosition =
-        random.nextDouble() * 800; // Replace with MediaQuery for dynamic width
 
-    // Select a random balloon image from the list
-    final balloonImage = _getBalloonImage();
+    // Generate more balloons at higher levels
+    int numberOfBalloons =
+        1 + (level ~/ 5); // Increase the number of balloons every 5 levels
 
-    final balloon = Balloon(
-      imagePath: balloonImage,
-      size: size,
-      position: Offset(
-          xPosition, 600 - size), // Replace with MediaQuery for dynamic height
-      points: size.toInt(),
-      timeChange: _getTimeChangeForBalloon(balloonImage),
-      iconPath: _getTimeIconForBalloon(balloonImage),
-    );
+    for (int i = 0; i < numberOfBalloons; i++) {
+      final size =
+          random.nextDouble() * 100 + 120; // Increased size: 120 to 220
+      final xPosition = random.nextDouble() *
+          800; // Replace with MediaQuery for dynamic width
 
-    balloons.add(balloon);
+      final balloonImage = _getBalloonImage();
+
+      final balloon = Balloon(
+        imagePath: balloonImage,
+        size: size,
+        position: Offset(xPosition,
+            600 - size), // Replace with MediaQuery for dynamic height
+        points: size.toInt(),
+        timeChange: _getTimeChangeForBalloon(balloonImage),
+        iconPath: _getTimeIconForBalloon(balloonImage),
+      );
+
+      balloons.add(balloon);
+    }
+
     updateState();
   }
 
@@ -84,8 +113,14 @@ class GameLogicService {
       return 0.0;
     }
 
-    final random = Random();
-    return random.nextBool() ? (random.nextBool() ? 2.0 : -2.0) : 0.0;
+    // Assign specific time change values based on the icon path
+    if (balloonImage.contains('subtract_time')) {
+      return -2.0;
+    } else if (balloonImage.contains('add_time')) {
+      return 2.0;
+    }
+
+    return 0.0;
   }
 
   String? _getTimeIconForBalloon(String balloonImage) {
@@ -93,31 +128,84 @@ class GameLogicService {
       return null;
     }
 
+    // Explicitly assign the correct icon based on time change
     final random = Random();
-    return random.nextBool()
-        ? 'assets/images/icons/add_time.png'
-        : 'assets/images/icons/subtract_time.png';
+    if (random.nextBool()) {
+      return 'assets/images/icons/subtract_time.png';
+    } else {
+      return 'assets/images/icons/add_time.png';
+    }
   }
 
   void updateGameState(Function updateState) {
     timeLeft -= 0.1;
 
-    // Check if time has run out
     if (timeLeft <= 0) {
-      timeLeft = 0; // Prevent the timer from showing negative values
+      timeLeft = 0;
       endGame();
       return;
     }
 
-    // Check if the player has leveled up
     if (balloonsPopped >= balloonsRequired) {
       levelUp();
     }
 
-    // Update balloon positions
     updateBalloonPositions();
+    updateState();
+  }
+
+  void updateBalloonPositions() {
+    balloons = balloons.map((balloon) {
+      // Increase the speed as levels progress
+      final newY = balloon.position.dy - (5 + level * 0.5);
+      return Balloon(
+        imagePath: balloon.imagePath,
+        size: balloon.size,
+        position: Offset(balloon.position.dx, newY),
+        points: balloon.points,
+        timeChange: balloon.timeChange,
+        iconPath: balloon.iconPath,
+      );
+    }).toList();
+
+    // Remove balloons that reached the top
+    balloons.removeWhere((balloon) => balloon.position.dy < 0);
+  }
+
+  void popBalloon(Balloon balloon, Function updateState) {
+    // If the balloon is the trick balloon, end the game immediately.
+    if (balloon.imagePath == 'assets/images/balloons/balloon_trick.png') {
+      endGame();
+      return;
+    }
+
+    score += balloon.points;
+    balloonsPopped++;
+
+    // Track the number of star balloons collected.
+    if (balloon.imagePath == 'assets/images/balloons/balloon_star.png') {
+      starBalloonsCollected++;
+    }
+
+    // Only modify time if the timeChange is non-zero.
+    if (balloon.timeChange != 0.0) {
+      timeLeft += balloon.timeChange;
+      _showTimeChangeFeedback(balloon.timeChange > 0.0, updateState);
+    }
+
+    // Remove the balloon and update the state.
+    balloons.remove(balloon);
+
+    // Update user stats if logged in.
+    final authProvider = Provider.of<AuthProvider>(context!, listen: false);
+    if (!authProvider.isGuest) {
+      _updateUserStats(balloon, authProvider.user?.uid);
+    }
 
     updateState();
+
+    // Check for all relevant achievements.
+    _checkAchievements();
   }
 
   void levelUp() {
@@ -128,10 +216,10 @@ class GameLogicService {
 
     // Adjust the balloon generation speed to increase difficulty
     balloonGeneratorTimer?.cancel();
+    int generationInterval =
+        max(1000 - level * 100, 200); // Speed up the game as levels increase
     balloonGeneratorTimer = Timer.periodic(
-      Duration(
-          milliseconds: max(
-              500 - level * 50, 100)), // Speed up the game as levels increase
+      Duration(milliseconds: generationInterval),
       (timer) {
         generateBalloon(() {});
       },
@@ -154,61 +242,16 @@ class GameLogicService {
     }
   }
 
-  void updateBalloonPositions() {
-    balloons = balloons.map((balloon) {
-      final newY = balloon.position.dy - 5;
-      return Balloon(
-        imagePath: balloon.imagePath,
-        size: balloon.size,
-        position: Offset(balloon.position.dx, newY),
-        points: balloon.points,
-        timeChange: balloon.timeChange,
-        iconPath: balloon.iconPath,
-      );
-    }).toList();
-
-    // Remove balloons that reached the top
-    balloons.removeWhere((balloon) => balloon.position.dy < 0);
-  }
-
-  void popBalloon(Balloon balloon, Function updateState) {
-    // If the balloon is the trick balloon, end the game immediately
-    if (balloon.imagePath == 'assets/images/balloons/balloon_trick.png') {
-      endGame();
-      return;
-    }
-
-    score += balloon.points;
-    balloonsPopped++;
-
-    // Track the number of star balloons collected
-    if (balloon.imagePath == 'assets/images/balloons/balloon_star.png') {
-      starBalloonsCollected++;
-    }
-
-    // Only decrease time if the balloon has a negative time change
-    if (balloon.timeChange < 0.0) {
-      timeLeft += balloon.timeChange;
-      _showTimeChangeFeedback(false, updateState);
-    } else if (balloon.timeChange > 0.0) {
-      // Increase time if the balloon has a positive time change
-      timeLeft += balloon.timeChange;
-      _showTimeChangeFeedback(true, updateState);
-    }
-
-    // Remove the balloon and update the state
-    balloons.remove(balloon);
-
-    // Update user stats if logged in
-    final authProvider = Provider.of<AuthProvider>(context!, listen: false);
-    if (!authProvider.isGuest) {
-      _updateUserStats(balloon, authProvider.user?.uid);
-    }
+  void _showTimeChangeFeedback(bool isPositive, Function updateState) {
+    // Temporarily change the color of the time left indicator to green or red
+    timeLeftColor = isPositive ? Colors.green : Colors.red;
 
     updateState();
 
-    // Check for all relevant achievements
-    _checkAchievements();
+    Timer(Duration(seconds: 1), () {
+      timeLeftColor = Colors.red;
+      updateState();
+    });
   }
 
   void _checkAchievements() {
@@ -289,18 +332,6 @@ class GameLogicService {
       'balloonsPopped': currentStats['balloonsPopped'],
       'score': currentStats['score'],
       'level': currentStats['level'],
-    });
-  }
-
-  void _showTimeChangeFeedback(bool isPositive, Function updateState) {
-    // Temporarily change the color of the time left indicator to green or red
-    timeLeftColor = isPositive ? Colors.green : Colors.red;
-
-    updateState();
-
-    Timer(Duration(seconds: 1), () {
-      timeLeftColor = Colors.red;
-      updateState();
     });
   }
 

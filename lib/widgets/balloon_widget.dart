@@ -23,10 +23,15 @@ class BalloonWidget extends StatelessWidget {
               height: balloon.size,
             ),
             if (balloon.iconPath != null)
-              Image.asset(
-                balloon.iconPath!,
-                width: balloon.size / 2,
-                height: balloon.size / 2,
+              Positioned(
+                bottom: 10, // Adjusts the position of the icon
+                child: Image.asset(
+                  balloon.iconPath!,
+                  width: balloon.size /
+                      3, // Adjusted icon size relative to balloon size
+                  height: balloon.size /
+                      3, // Adjusted icon size relative to balloon size
+                ),
               ),
           ],
         ),
